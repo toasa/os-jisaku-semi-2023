@@ -15,8 +15,25 @@ typedef struct {
 // 戻り値は、次にスケジュールするタスクのpid
 // スケジュールするタスクがない場合は0を返す
 int schedule(Process *proc, int len_proc) {
-    // ここに実装を書いてください
-    return 0;
+    int pid = 0;
+
+    int max_priority = -1;
+    int min_rem_time;
+    for (int i = 0; i < len_proc; i++) {
+        if (proc[i].priority > max_priority && proc[i].remaining_time != 0) {
+            pid = proc[i].pid;
+            max_priority = proc[i].priority;
+            min_rem_time = proc[i].remaining_time;
+        } else if (proc[i].priority == max_priority &&
+                   proc[i].remaining_time != 0) {
+            if (proc[i].remaining_time < min_rem_time) {
+                pid = proc[i].pid;
+                min_rem_time = proc[i].remaining_time;
+            }
+        }
+    }
+
+    return pid;
 }
 
 int test(Process *proc, int len_proc, int *expected, int len_expected) {
