@@ -43,7 +43,7 @@ struct Test {
     int nexpected;
 };
 
-int test(struct Test t) {
+static int test(struct Test t) {
     int pid, time = 0;
 
     while (1) {
@@ -73,7 +73,7 @@ int test(struct Test t) {
 
 #define ARR_SIZE(a) (int)(sizeof(a) / sizeof(a[0]))
 
-void do_tests(void) {
+static void do_tests(void) {
     struct Test tests[] = {
         {
             .title = "Single process",
