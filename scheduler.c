@@ -44,10 +44,10 @@ struct Test {
 };
 
 static int test(struct Test t) {
-    int pid, time = 0;
+    int time = 0;
 
     while (1) {
-        pid = schedule(t.procs, t.nprocs);
+        int pid = schedule(t.procs, t.nprocs);
 
         if (t.expected[time] != pid) {
             fprintf(stderr, "Expected pid is %d, but actually %d.\n",
