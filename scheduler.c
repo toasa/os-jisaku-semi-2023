@@ -33,34 +33,6 @@ int schedule(Process *proc, int len_proc) {
     return pid;
 }
 
-int test(Process *proc, int len_proc, int *expected, int len_expected) {
-    int pid, time = 0;
-
-    while (1) {
-        pid = schedule(proc, len_proc);
-
-        if (expected[time] != pid) {
-            fprintf(stderr, "Expected pid is %d, but actually %d.\n",
-                    expected[time], pid);
-            return 1;
-        }
-
-        time++;
-
-        if (pid == 0)
-            break;
-
-        for (int i = 0; i < len_proc; i++) {
-            if (proc[i].pid == pid) {
-                proc[i].remaining_time--;
-                break;
-            }
-        }
-    };
-
-    return 0;
-}
-
 struct Test {
     char *title;
 
@@ -70,6 +42,34 @@ struct Test {
     int expected[64];
     int nexpected;
 };
+
+int test(struct Test t) {
+    int pid, time = 0;
+
+    while (1) {
+        pid = schedule(t.procs, t.nprocs);
+
+        if (t.expected[time] != pid) {
+            fprintf(stderr, "Expected pid is %d, but actually %d.\n",
+                    t.expected[time], pid);
+            return 1;
+        }
+
+        time++;
+
+        if (pid == 0)
+            break;
+
+        for (int i = 0; i < t.nprocs; i++) {
+            if (t.procs[i].pid == pid) {
+                t.procs[i].remaining_time--;
+                break;
+            }
+        }
+    };
+
+    return 0;
+}
 
 #define ARR_SIZE(a) (int)(sizeof(a) / sizeof(a[0]))
 
@@ -115,7 +115,7 @@ void do_tests(void) {
     for (int i = 0; i < ARR_SIZE(tests); i++) {
         struct Test t = tests[i];
         printf("%s... ", t.title);
-        int res = test(t.procs, t.nprocs, t.expected, t.nexpected);
+        int res = test(t);
         printf("%s\n", res == 0 ? "OK" : "NG");
     }
 }
