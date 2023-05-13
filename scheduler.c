@@ -3,9 +3,6 @@
 
 #include <stdio.h>
 
-#define NUM_PROCESSES 5
-#define NUM_SEQ 16
-
 typedef struct {
     int pid;            // プロセスID
     int priority;       // 優先度
@@ -56,27 +53,74 @@ int test(Process *proc, int len_proc, int *expected, int len_expected) {
         for (int i = 0; i < len_proc; i++) {
             if (proc[i].pid == pid) {
                 proc[i].remaining_time--;
-                printf("pid = %d, rem = %d\n", pid, proc[i].remaining_time);
                 break;
             }
         }
     };
 
-    puts("PASS");
-
     return 0;
 }
 
+struct Test {
+    char *title;
+
+    Process procs[64];
+    int nprocs;
+
+    int expected[64];
+    int nexpected;
+};
+
+#define ARR_SIZE(a) (int)(sizeof(a) / sizeof(a[0]))
+
+void do_tests(void) {
+    struct Test tests[] = {
+        {
+            .title = "Single process",
+            .procs = {{1, 1, 2}},
+            .nprocs = 1,
+            .expected = {1, 1, 0},
+            .nexpected = 2,
+        },
+        {
+            .title = "Different priority",
+            .procs = {{1, 1, 2}, {2, 2, 2}},
+            .nprocs = 2,
+            .expected = {2, 2, 1, 1, 0},
+            .nexpected = 5,
+        },
+        {
+            .title = "Same priority but different remaining time",
+            .procs = {{1, 1, 2}, {2, 1, 3}},
+            .nprocs = 2,
+            .expected = {1, 1, 2, 2, 2, 0},
+            .nexpected = 6,
+        },
+        {
+            .title = "No remaining time",
+            .procs = {{1, 2, 0}},
+            .nprocs = 1,
+            .expected = {0},
+            .nexpected = 1,
+        },
+        {
+            .title = "Iroiro",
+            .procs = {{1, 2, 5}, {2, 1, 3}, {3, 3, 2}, {4, 2, 4}, {5, 1, 1}},
+            .nprocs = 5,
+            .expected = {3, 3, 4, 4, 4, 4, 1, 1, 1, 1, 1, 5, 2, 2, 2, 0},
+            .nexpected = 16,
+        },
+    };
+
+    for (int i = 0; i < ARR_SIZE(tests); i++) {
+        struct Test t = tests[i];
+        printf("%s... ", t.title);
+        int res = test(t.procs, t.nprocs, t.expected, t.nexpected);
+        printf("%s\n", res == 0 ? "OK" : "NG");
+    }
+}
+
 int main(void) {
-    Process processes[NUM_PROCESSES] = {// pid, priority, remaining_time
-                                        {1, 2, 5},
-                                        {2, 1, 3},
-                                        {3, 3, 2},
-                                        {4, 2, 4},
-                                        {5, 1, 1}};
-
-    int expected_seq[NUM_SEQ] = {3, 3, 4, 4, 4, 4, 1, 1,
-                                 1, 1, 1, 5, 2, 2, 2, 0};
-
-    return test(processes, NUM_PROCESSES, expected_seq, NUM_SEQ);
+    do_tests();
+    return 0;
 }
